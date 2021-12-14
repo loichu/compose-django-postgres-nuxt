@@ -1,0 +1,32 @@
+version: "3.9"
+
+#x-app: &default-app
+#  build:
+#    context: "."
+#  volumes:
+#    - .:/code
+#  restart: "unless-stopped"
+
+services:
+  db:
+    image: postgres
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    env_file:
+      - .env
+  api:
+    #<<: *default-app
+    build:
+      context: ${DJANGO_DIR}
+      args:
+        DJANGO_DIR: ${DJANGO_DIR}
+    env_file:
+      - .env
+    volumes:
+      - ${DJANGO_DIR}:/code
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    restart: "unless-stopped"
